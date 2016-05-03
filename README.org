@@ -1,0 +1,133 @@
+* Preface
+
+  The purpose of the programme is to enable precise mapping with
+  relatively cheap tools. At first sight GPS seems to be the best tool
+  possible.  GPS receivers are dirt-cheap. They come in most mobile
+  devices like smartphones and tablets for free. However, GPS has its
+  downsides: it does not work well near tall buildings, distances can
+  be measured at quite high precission but not absolute positions.
+  However, with six decimal digits (~10cm) short distances (<10m)
+  can't be measured precisely. On the other hand EDMs available in DIY
+  stores enable very precise (±1.5 mm) measurements in quite wide
+  range of distances (0.05-70 m).
+
+  Establishing positions by measuring distances requires some
+  calculations. Fortunately the method, known as trilateration[fn:4]
+  is easy to implement.
+
+* Design the network
+
+  Walk around the place you want to survey, count the vertices of the
+  objects you want to map as well as supplementary ones you need to
+  build a well-conditioned network. For anything more complicated than
+  a rectangle sketching a structure of the network will help
+  establishing proper orientation of triangles. Put numbers next to
+  all vertices of your drawing.
+
+* Prepare a table
+
+  | A | B | C | a | b |
+  |---+---+---+---+---|
+  |   |   |   |   |   |
+
+  Each row holds data for one triangle. The first three colums hold
+  symbols (numbers) of vertices of a particular triangle. The latter
+  two hold lengths of sides opposite to A and B vertices. The length
+  of 'c' side is the distance between points A and B which location
+  are known.
+
+  NOTE: The order of the verices is crucial. The formulae[fn:1] assume
+  vertices are enumerated counter-clockwise and the location of the
+  last one (C) is unknown.
+
+  As of now the programme can't determine the proper order of
+  calculations and it requires input date to be ordered to allow
+
+* Example
+
+  In the following example the first two points are A and B. A is
+  assumend to be at (0, 0) and B at (0, c) where c is the distance
+  between them, which is 5 in this case. C is the first unkown point.
+  As soon as it's position is calculated and lengths of BD and CD are
+  know the location of D can be established.
+
+  | A | B | C | a      | b      |
+  |---+---+---+--------+--------|
+  | A | B | C | 3      | 4      |
+  | C | B | D | 4 (BD) | 5 (CD) |
+
+  
+#+BEGIN_SRC fundamental
+  .PS
+  scale=2.54
+  AB: line right 5
+  BC: line up 2.4 left 1.8 at AB.end
+  AC: line up 2.4 right 3.2 at AB.start
+  BD: line up 2.4 right 3.2 at AB.end
+  CD: line right 5 at AC.end
+  "A" at AB.start - (0,0.2)
+  "B" at AB.end - (0,0.2)
+  "C" at AC.end + (0,0.15)
+  "D" at BD.end + (0,0.15)
+  "a" at BC.center - (0.2,0)
+  "b" at AC.center + (0.3,0)
+  "c" at AB.center + (0,0.2)
+  .PE
+#+END_SRC 
+
+The following CSV holds data for this example.
+
+#+BEGIN_EXAMPLE
+  Type,c1,c2,c3,c4,c5
+  P,A,0,0
+  P,B,5,0
+  T,A,B,C,3,4
+  T,C,B,D,4,5
+#+END_EXAMPLE
+
+  The output of the programme is a three-column table. The first
+  column is an identifier of a point, the next two are its
+  coordinates. The last is the point's "distance" from a point with
+  known coordinates. It may be useful to estimate error.
+
+  | Point |   X |   Y | oder |
+  |-------+-----+-----+------|
+  | A     |   0 |   0 |    0 |
+  | B     |   5 |   0 |    0 |
+  | C     | 3.2 | 2.4 |    1 |
+  | D     | 8.2 | 2.4 |    2 |
+
+* Known values
+
+  Different known values are required depending on requirements
+  regarding output. To get relative location of points in a local
+  coordinate system there is no need to know absolute location of any
+  points in a global reference system (WGS84, UTM etc.). To place
+  points in a global reference system location of two points in that
+  system is required. With three points in a global reference frame
+  availabel the location of the surveyed object can be established as
+  well as possible errors can be estimated.
+
+  Either way, the programm requires location of two points in the
+  input. If no global location is needed assume any one point acts as
+  the beginning of the coordinate system (0, 0) and another with a
+  known distance /d/ form the former is placed at (0, /d/).
+
+* Applicability
+
+  The the programme is meant as a tool for surveying flat surfaces
+  which in theory[fn:2] means areas smaller than 30km in diamater and in
+  practice everything an amature mapper with a cheap EDM[fn:3] would
+  like to map. 
+
+* Footnotes
+
+[fn:1] https://pl.wikipedia.org/wiki/Wci%C4%99cie_liniowe_w_prz%C3%B3d
+
+[fn:2] http://www.wydawnictwopw.pl/index.php?s=karta&id=211
+
+[fn:3] http://www.conrad.com/ce/en/product/826512
+
+[fn:4] https://www.e-education.psu.edu/natureofgeoinfo/c5_p12.html
+
+
