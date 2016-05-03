@@ -1,4 +1,4 @@
-#!/usr/bin/pytho
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
 # trimap.py - Calculate positions of vertices of triangle mesh
